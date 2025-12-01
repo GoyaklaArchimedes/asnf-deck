@@ -512,7 +512,41 @@
   ,{ text: "You can start again at any moment; renewal is always one breath away.", author: "Roshi Kapleau" }
   ];
 
-  let currentIndex = 0;
+    // --- Navigation + initial index logic ---
+
+  function getDayOfYearIndex() {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), 0, 1); // Jan 1
+    const diff = today - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    let dayOfYear = Math.floor(diff / oneDay) + 1; // 1–365
+
+    // We assume cards[0] is the dedication,
+    // so Day 1 → index 1, Day 2 → index 2, etc.
+    if (dayOfYear < 1) dayOfYear = 1;
+    if (dayOfYear >= cards.length) dayOfYear = cards.length - 1;
+    return dayOfYear;
+  }
+
+  function getInitialIndex() {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+
+    // ?mode=random → start on a random card
+    if (mode === "random") {
+      return Math.floor(Math.random() * cards.length);
+    }
+
+    // ?mode=day → start on today's card
+    if (mode === "day") {
+      return getDayOfYearIndex();
+    }
+
+    // Default: dedication (index 0)
+    return 0;
+  }
+
+  let currentIndex = getInitialIndex();
 
   function renderCard(index) {
     const card = cards[index];
@@ -545,7 +579,9 @@
     renderCard(currentIndex);
   }
 
+  // Initial render
   renderCard(currentIndex);
+
 </script>
 </body>
 </html>
